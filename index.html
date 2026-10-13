@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Arbolito App v3.3 -->
+<!-- Arbolito App v3.4 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -446,7 +446,7 @@ select{cursor:pointer;}
 <body>
 
 <header class="topbar">
-  <div class="brand"><span class="brand-dot"></span><span>Arbolito App</span><span class="brand-ver">v3.3</span></div>
+  <div class="brand"><span class="brand-dot"></span><span>Arbolito App</span><span class="brand-ver">v3.4</span></div>
   <div class="search-wrap" id="search-wrap">
     <span data-icon="search"></span>
     <input type="text" id="search" autocomplete="off" spellcheck="false" data-i18n-ph="searchPh">
@@ -485,6 +485,7 @@ select{cursor:pointer;}
         <div class="tsep"></div>
         <button class="tbtn" id="btn-fit"><span data-icon="fit"></span><span class="lbl" data-i18n="fit"></span></button>
         <button class="tbtn" id="btn-collapse-all"><span data-icon="collapse"></span><span class="lbl" data-i18n="collapse"></span></button>
+        <button class="tbtn" id="btn-fam-all"><span data-icon="users"></span><span class="lbl" data-i18n="famAllCollapse"></span></button>
         <div class="tsep"></div>
         <div class="drop">
           <button class="tbtn" id="btn-style"><span data-icon="sliders"></span><span class="lbl" data-i18n="style"></span></button>
@@ -548,7 +549,7 @@ select{cursor:pointer;}
     <div class="set-row"><div><div class="set-title" data-i18n="copy"></div><div class="set-desc" data-i18n="copyDesc"></div></div>
       <div style="display:flex;gap:6px"><button class="ghost-btn" data-act="copy"><span data-icon="copy"></span><span data-i18n="copy"></span></button>
       <button class="ghost-btn" data-act="paste"><span data-icon="clipboard"></span><span data-i18n="paste"></span></button></div></div>
-    <div class="set-foot">Arbolito App v3.3 · <span data-i18n="localNote"></span></div>
+    <div class="set-foot">Arbolito App v3.4 · <span data-i18n="localNote"></span></div>
   </div>
 </div>
 
@@ -658,7 +659,7 @@ select{cursor:pointer;}
    Arbolito v3.0
    Datos: localStorage 'gt3' (mismo formato que v2.x)
    ════════════════════════════════════════════════════════════════ */
-const VERSION='3.3';
+const VERSION='3.4';
 
 /* ── layout constants ── */
 const CARD_W=188;          // card width (px, canvas units) — keep in sync with --card-w
@@ -962,6 +963,24 @@ function collapseFamily(key){
   if(S.selectedId&&HIDDEN.has(S.selectedId)){S.selectedId=null;closePanel();}
   renderAll();autoLayout(t('famCollapsed'));
 }
+function toggleAllFamilies(){
+  const keys=Object.keys(S.famCollapsed||{});
+  if(keys.length){keys.reverse().forEach(k=>expandFamily(k,true));computeHidden();renderAll();autoLayout(t('famExpandedAll'));return;}
+  // collapse the families of the last generation (couples whose children have no children)
+  const G=graph(true);const fams=new Set();
+  Object.keys(S.people).forEach(id=>{if(G.par[id].length)fams.add(G.par[id].slice().sort().join('+'));});
+  const leaf=[...fams].filter(k=>famKids(k,G).every(kid=>!G.ch[kid].length));
+  if(!leaf.length){toast(t('famNone'));return;}
+  leaf.forEach(key=>{
+    const rep=famFather(key);if(!rep)return;
+    S.famCollapsed[key]={rep,v:2,off:{}};computeHidden();
+    const rp=S.people[rep];
+    Object.keys(HIDKEY).forEach(id=>{if(HIDKEY[id]===key)S.famCollapsed[key].off[id]=[(S.people[id].x||0)-(rp.x||0),(S.people[id].y||0)-(rp.y||0)];});
+  });
+  S.selectedIds.forEach(id=>{if(HIDDEN.has(id))S.selectedIds.delete(id);});
+  if(S.selectedId&&HIDDEN.has(S.selectedId)){S.selectedId=null;closePanel();}
+  renderAll();autoLayout(t('famCollapsedAll').replace('{n}',leaf.length));
+}
 function expandFamily(key,noLayout){
   const fc=S.famCollapsed[key];if(!fc)return;
   const rp=S.people[fc.rep];
@@ -1011,6 +1030,8 @@ function renderAll(){
   for(const id of vis) measureCard(id);
   renderConns();
   updateCounter();
+  const fb=document.getElementById('btn-fam-all');
+  if(fb){const any=Object.keys(S.famCollapsed||{}).length>0;fb.innerHTML=ic(any?'expand':'users')+'<span class="lbl">'+t(any?'famAllExpand':'famAllCollapse')+'</span>';fb.title=t(any?'famAllExpandT':'famAllCollapseT');}
   const btn=document.getElementById('btn-collapse-all');
   if(btn){const ids=Object.keys(S.people);const anyExp=!ids.length||ids.some(id=>!S.collapsed[id]);
     btn.innerHTML=ic(anyExp?'collapse':'expand')+'<span class="lbl">'+t(anyExp?'collapse':'expand')+'</span>';}
@@ -1312,9 +1333,11 @@ function renderConns(){
       });
     }
     label(parentMidX,junctionY-7,t('relPadreMadre'),'lbl-padre');
-    if(vChildren.length>=1&&!vChildren.some(k=>REPS[k])&&realKeys.has(parents.join('+'))){
+    if(vChildren.length>=1&&realKeys.has(parents.join('+'))){
       // "−" chip: collapse these siblings into a "Familia X" card
-      const cy=BEZIER?junctionY+16:Math.max(junctionY+14,childTopY-30);
+      // halfway down the trunk between the parents and their children
+      const barY=vChildren.length>1?Math.max(junctionY+14,childTopY-30):childTopY;
+      const cy=BEZIER?(junctionY+childTopY)/2:(junctionY+barY)/2;
       L.push('<g class="famtog" data-fam="'+parents.join('+')+'"><title>'+esc(t('collapseFam'))+'</title><circle cx="'+r1(parentMidX)+'" cy="'+r1(cy)+'" r="9"/>'+
         '<path d="M'+r1(parentMidX-4)+','+r1(cy)+' H'+r1(parentMidX+4)+'"/></g>');
     }
@@ -2474,7 +2497,7 @@ function layoutComponent(members,G,gen,cur,hasPar){
             d2+=Math.sign(ppx[b]-it.px)*(d===u.anchor?2:1);
           });
         });
-        u.pull=Math.sign(d2)||u.want;
+        u.pull=u.want||Math.sign(d2);
         u.partnered=u.mem.length>1||G.coup[u.anchor].some(b=>b!==u.anchor&&inComp.has(b));
       });
       if(it.units.length>1){
@@ -2482,8 +2505,9 @@ function layoutComponent(members,G,gen,cur,hasPar){
         it.units.forEach(u=>{u.w=(u.partnered||u.pull)?worldW(u):0;});
         const singles=it.units.filter(u=>!u.partnered&&!u.pull);
         const Pp=it.units.filter(u=>u.partnered||u.pull);
-        const L=Pp.filter(u=>u.pull<0).sort((a,b)=>b.w-a.w||cur[a.anchor]-cur[b.anchor]);
-        const R=Pp.filter(u=>u.pull>0).sort((a,b)=>a.w-b.w||cur[a.anchor]-cur[b.anchor]);
+        // a sibling married into the neighbouring family always takes the very edge
+        const L=Pp.filter(u=>u.pull<0).sort((a,b)=>(b.want?1:0)-(a.want?1:0)||b.w-a.w||cur[a.anchor]-cur[b.anchor]);
+        const R=Pp.filter(u=>u.pull>0).sort((a,b)=>(a.want?1:0)-(b.want?1:0)||a.w-b.w||cur[a.anchor]-cur[b.anchor]);
         Pp.filter(u=>!u.pull).sort((a,b)=>b.w-a.w||cur[a.anchor]-cur[b.anchor]).forEach(u=>{
           const side=L.length<R.length?-1:R.length<L.length?1:(cur[u.anchor]<grpC?-1:1);
           if(side<0)L.push(u);else R.unshift(u);
@@ -2524,10 +2548,17 @@ function layoutComponent(members,G,gen,cur,hasPar){
   };
   const reorder=(row,keyFn)=>{
     row.list.forEach((it,i)=>{const k=keyFn(it);it.key=k===null?it.px:k;it.ord=i;});
-    row.list.sort((a,b)=>a.key-b.key||a.ord-b.ord);pack(row);
+    const blocks=new Map();
+    row.list.forEach(it=>{const b=it.block||it;if(!blocks.has(b))blocks.set(b,b.chain?b.chain.slice():[it]);});
+    const arr=[...blocks.values()].map(chain=>{
+      if(chain.length>1&&chain[0].key>chain[chain.length-1].key)chain.reverse();
+      const W=chain.reduce((s,it)=>s+it.w,0);
+      return {chain,key:chain.reduce((s,it)=>s+it.key*it.w,0)/W,ord:Math.min(...chain.map(it=>it.ord))};
+    });
+    arr.sort((a,b)=>a.key-b.key||a.ord-b.ord);
+    row.list=[].concat(...arr.map(a=>a.chain));pack(row);
   };
   const kidsKey=it=>{
-    if(it.real)return null;
     const ks=[];it.units.forEach(u=>u.mem.forEach(m=>G.ch[m].forEach(k=>{if(has(k)&&gen[k]>gen[m])ks.push(ppx[k]);})));
     return ks.length?mean(ks):null;
   };
@@ -2538,8 +2569,34 @@ function layoutComponent(members,G,gen,cur,hasPar){
     return ps.length?mean(ps.map(p=>ppx[p])):null;
   };
   rows.forEach(pack);
+  // families linked by a marriage form a chain that is never split: nobody (no other
+  // family, no sibling) can end up between the two partners
+  rows.forEach(row=>{
+    const itemOfP={};row.list.forEach(it=>it.units.forEach(u=>u.mem.forEach(m=>{itemOfP[m]=it;})));
+    const adj=new Map();row.list.forEach(it=>adj.set(it,new Set()));
+    VCONNS.forEach(c=>{
+      if(c.type!=='pareja'||!row.inRow.has(c.from)||!row.inRow.has(c.to))return;
+      if(!isAnchor(c.from)||!isAnchor(c.to))return;
+      const A=itemOfP[c.from],B=itemOfP[c.to];if(!A||!B||A===B||A.free||B.free)return;
+      adj.get(A).add(B);adj.get(B).add(A);
+    });
+    const seen=new Set();
+    row.list.forEach(it=>{
+      if(seen.has(it)||!adj.get(it).size)return;
+      const comp=[],q=[it];seen.add(it);
+      while(q.length){const x=q.shift();comp.push(x);adj.get(x).forEach(y=>{if(!seen.has(y)){seen.add(y);q.push(y);}});}
+      comp.sort((a,b)=>a.px-b.px);
+      let start=comp.find(x=>adj.get(x).size===1)||comp[0];
+      const chain=[start],used=new Set([start]);
+      let curI=start;
+      while(true){const nx=[...adj.get(curI)].filter(y=>!used.has(y)).sort((a,b)=>a.px-b.px)[0];if(!nx)break;chain.push(nx);used.add(nx);curI=nx;}
+      comp.forEach(x=>{if(!used.has(x)){chain.push(x);used.add(x);}});
+      const blk={chain};chain.forEach(x=>{x.block=blk;});
+    });
+  });
+  rows.forEach(pack);
   rows.forEach(r=>{arrange(r);pack(r);});
-  for(let pass=0;pass<5;pass++){
+  for(let pass=0;pass<12;pass++){
     for(let r=rows.length-2;r>=0;r--)reorder(rows[r],kidsKey);
     for(let r=1;r<rows.length;r++)reorder(rows[r],parKeyFn);
     rows.forEach(r=>{arrange(r);pack(r);});
@@ -3133,6 +3190,7 @@ var LANG={
     replaceMsgFile:'Esto reemplaza el árbol actual por el del archivo. Podés deshacerlo después.',
     nothingToCopy:'No hay nada para copiar',copiedAll:'Árbol completo copiado ({n} personas)',copiedSome:'{n} seleccionados copiados',
     pasted:'{n} personas pegadas',pasted1:'1 persona pegada',pasteInvalid:'No se pudo leer el texto pegado',pasteNotTree:'El texto no es un árbol válido',
+    famAllCollapse:'Familias',famAllExpand:'Expandir familias',famAllCollapseT:'Contraer las familias de la última generación',famAllExpandT:'Expandir todas las familias',famCollapsedAll:'{n} familias contraídas',famExpandedAll:'Familias expandidas',famNone:'No hay familias para contraer',
     family:'Familia',famSub:'{n} hijos',famSub1:'1 hijo',collapseParentsFam:'Contraer familia de sus padres',expandFam:'Expandir',collapseFam:'Contraer familia',collapseSibs:'Contraer hermanos',collapseKids:'Contraer hijos',famCollapsed:'Familia contraída',famExpanded:'Familia expandida',famNoDelete:'Expandí la familia para borrar a alguien',
     newHere:'Crear acá',newMan:'Nuevo hombre',newWoman:'Nueva mujer',newOther:'Nueva persona (otro)',pasteHere:'Pegar acá',selectAll:'Seleccionar todo',alignSel:'Alinear selección',copySel:'Copiar selección',deleteN:'Eliminar {n} personas',centerHere:'Centrar en pantalla',
     settingsTitle:'Configuración',setGeneral:'General',setData:'Datos',language:'Idioma',showIds:'IDs de generación (debug)',
@@ -3190,6 +3248,7 @@ var LANG={
     replaceMsgFile:'This replaces the current tree with the file. You can undo it.',
     nothingToCopy:'Nothing to copy',copiedAll:'Whole tree copied ({n} people)',copiedSome:'{n} selected copied',
     pasted:'{n} people pasted',pasted1:'1 person pasted',pasteInvalid:'Could not read the pasted text',pasteNotTree:'That text is not a valid tree',
+    famAllCollapse:'Families',famAllExpand:'Expand families',famAllCollapseT:'Collapse the families of the last generation',famAllExpandT:'Expand all families',famCollapsedAll:'{n} families collapsed',famExpandedAll:'Families expanded',famNone:'No families to collapse',
     family:'Family',famSub:'{n} children',famSub1:'1 child',collapseParentsFam:'Collapse parents\' family',expandFam:'Expand',collapseFam:'Collapse family',collapseSibs:'Collapse siblings',collapseKids:'Collapse children',famCollapsed:'Family collapsed',famExpanded:'Family expanded',famNoDelete:'Expand the family to delete someone',
     newHere:'Create here',newMan:'New man',newWoman:'New woman',newOther:'New person (other)',pasteHere:'Paste here',selectAll:'Select all',alignSel:'Align selection',copySel:'Copy selection',deleteN:'Delete {n} people',centerHere:'Center on screen',
     settingsTitle:'Settings',setGeneral:'General',setData:'Data',language:'Language',showIds:'Generation IDs (debug)',
@@ -3235,6 +3294,7 @@ on('btn-organize',autoLayout);
 on('btn-align',()=>snapToGrid());
 on('btn-fit',()=>fitScreen());
 on('btn-collapse-all',toggleCollapseAll);
+on('btn-fam-all',toggleAllFamilies);
 on('btn-zin',()=>doZoom(1.25));on('btn-zout',()=>doZoom(0.8));
 on('zoom-pct',()=>{const r=cwEl.getBoundingClientRect();animateView(1,null,null,r.width/2,r.height/2);});
 on('btn-style',e=>toggleMenu('settings-menu',e));
