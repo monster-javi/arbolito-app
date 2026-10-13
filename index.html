@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Arbolito App v3.7 -->
+<!-- Arbolito App v3.8 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -446,7 +446,7 @@ select{cursor:pointer;}
 <body>
 
 <header class="topbar">
-  <div class="brand"><span class="brand-dot"></span><span>Arbolito App</span><span class="brand-ver">v3.7</span></div>
+  <div class="brand"><span class="brand-dot"></span><span>Arbolito App</span><span class="brand-ver">v3.8</span></div>
   <div class="search-wrap" id="search-wrap">
     <span data-icon="search"></span>
     <input type="text" id="search" autocomplete="off" spellcheck="false" data-i18n-ph="searchPh">
@@ -549,7 +549,7 @@ select{cursor:pointer;}
     <div class="set-row"><div><div class="set-title" data-i18n="copy"></div><div class="set-desc" data-i18n="copyDesc"></div></div>
       <div style="display:flex;gap:6px"><button class="ghost-btn" data-act="copy"><span data-icon="copy"></span><span data-i18n="copy"></span></button>
       <button class="ghost-btn" data-act="paste"><span data-icon="clipboard"></span><span data-i18n="paste"></span></button></div></div>
-    <div class="set-foot">Arbolito App v3.7 · <span data-i18n="localNote"></span></div>
+    <div class="set-foot">Arbolito App v3.8 · <span data-i18n="localNote"></span></div>
   </div>
 </div>
 
@@ -659,7 +659,7 @@ select{cursor:pointer;}
    Arbolito v3.0
    Datos: localStorage 'gt3' (mismo formato que v2.x)
    ════════════════════════════════════════════════════════════════ */
-const VERSION='3.7';
+const VERSION='3.8';
 
 /* ── layout constants ── */
 const CARD_W=188;          // card width (px, canvas units) — keep in sync with --card-w
@@ -2277,14 +2277,55 @@ function snapToGrid(onlyIds, yOnly){
     });
   }
   if(!onlyIds){
-    var allIds=Object.keys(S.people);
-    var rootIds=allIds.filter(function(id){return !S.connections.some(function(c){return c.type==='padre'&&c.to===id;});});
-    recenterChildren(rootIds);
+    alignFamilies();
   }
   persist();renderAll();
   if(!onlyIds)toast(t('aligned'),{action:t('undo'),fn:undo});
 }
 
+/* Alinear (v3.8): after the rows are straightened, each group of children slides
+   towards the point its line hangs from (cascade-aware, see hangX), as a block with
+   its married-in partners and never past its neighbours, top row first. Families that
+   are already centred, or have no room, stay exactly where they are, so Alinear never
+   creates overlaps and does not undo Reorganizar. */
+function alignFamilies(){
+  const G=graph(),vis=visIds(),visSet=new Set(vis);
+  const now=q=>S.people[q].x||0,yy=q=>S.people[q].y||0,W=q=>cardSize(q).w;
+  const fams={};
+  vis.forEach(k=>{const ps=G.par[k].filter(q=>visSet.has(q));if(!ps.length)return;const key=ps.slice().sort().join('+');(fams[key]=fams[key]||{ps,kids:[]}).kids.push(k);});
+  const list=Object.values(fams);
+  list.forEach(f=>{f.ky=yy(f.kids[0]);});
+  list.sort((a,b)=>a.ky-b.ky);
+  list.forEach(f=>{
+    if(f.kids.some(k=>Math.abs(yy(k)-f.ky)>1))return;
+    if(f.ps.some(q=>yy(q)>=f.ky))return;
+    const mem=new Set(f.kids);
+    f.kids.forEach(k=>G.coup[k].forEach(c=>{if(visSet.has(c)&&!G.par[c].length&&Math.abs(yy(c)-f.ky)<=1)mem.add(c);}));
+    let lo=1e9,hi=-1e9;mem.forEach(q=>{lo=Math.min(lo,now(q));hi=Math.max(hi,now(q)+W(q));});
+    const kc=f.kids.map(k=>now(k)+W(k)/2);
+    const d0=hangX(f.ps,now,G,vis)-(Math.min(...kc)+Math.max(...kc))/2;
+    if(Math.abs(d0)<1)return;
+    let L=-1e9,R=1e9,blocked=false;
+    vis.forEach(q=>{if(mem.has(q)||Math.abs(yy(q)-f.ky)>1)return;const a=now(q),b=a+W(q);
+      if(b<=lo+0.5)L=Math.max(L,b);else if(a>=hi-0.5)R=Math.min(R,a);else blocked=true;});
+    if(blocked)return;
+    let d=d0>0?Math.min(d0,R-SIB_GAP-hi):Math.max(d0,L+SIB_GAP-lo);
+    if(d*d0<=0)return;
+    d=Math.round(d);
+    mem.forEach(q=>{S.people[q].x=now(q)+d;});
+  });
+  // straightening rows can put two cards on top of each other: open them up by the
+  // smallest possible amount, keeping the left-to-right order
+  const rows={};vis.forEach(q=>{const k=Math.round(yy(q));(rows[k]=rows[k]||[]).push(q);});
+  Object.values(rows).forEach(r=>{
+    r.sort((a,b)=>now(a)-now(b));
+    const sep=[];let bad=false;
+    for(let i=0;i<r.length-1;i++){sep.push(W(r[i])+SIB_GAP);if(now(r[i+1])-now(r[i])<W(r[i])+SIB_GAP-0.5)bad=true;}
+    if(!bad)return;
+    const out=pavaSolve(r.map(now),r.map(()=>1),sep);
+    r.forEach((q,i)=>{S.people[q].x=Math.round(out[i]);});
+  });
+}
 function updateFollowerOffset(dragId){
   S.connections.forEach(function(c){
     if(c.type!=='pareja'&&c.type!=='hermano')return;
