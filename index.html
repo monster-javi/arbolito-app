@@ -387,6 +387,34 @@ select{cursor:pointer;}
 .modal .set-row select.lang-select{width:auto;min-width:90px;height:34px;padding:0 12px;font-size:13px;background:var(--surface-2);text-align:left;}
 .set-foot{margin-top:16px;font-size:11.5px;color:var(--text-faint);text-align:center;}
 
+
+/* ═══════════ CLOUD (login / lock / cifrado) ═══════════ */
+.cl-screen{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(6,7,10,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+.cl-screen.open{display:flex;}
+.cl-card{position:relative;width:340px;max-width:100%;background:var(--surface-2);border-radius:16px;padding:22px;box-shadow:var(--shadow-pop);animation:pop .16s ease;}
+.cl-brand{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;margin-bottom:8px;color:var(--text);}
+.cl-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.cl-title{font-size:16px;font-weight:700;margin:0 24px 8px 0;color:var(--text);}
+.cl-text{font-size:13.5px;line-height:1.5;color:var(--text-dim);margin:0 0 18px;}
+.cl-input{display:block;width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font:inherit;font-size:13.5px;outline:none;margin-bottom:8px;}
+.cl-input:focus{border-color:var(--accent-line);}
+.cl-err{font-size:12.5px;color:var(--danger);margin:2px 0 10px;line-height:1.45;}
+.cl-note{font-size:12.5px;color:var(--accent);margin:2px 0 10px;line-height:1.45;}
+.cl-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}
+.cl-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:9px;font:inherit;font-size:13.5px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);}
+.cl-btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700;}
+.cl-btn.danger{background:var(--danger);border-color:var(--danger);color:#fff;font-weight:700;}
+.cl-btn:disabled{opacity:.6;cursor:default;}
+.cl-btn.block{width:100%;padding:10px 14px;}
+.cl-links{display:flex;justify-content:space-between;gap:10px;margin-top:14px;font-size:12.5px;}
+.cl-link{background:none;border:none;padding:0;color:var(--text-dim);font:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.cl-link:hover{color:var(--text);}
+.cl-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:14px;padding:4px;}
+.cl-sync{display:inline-flex;align-items:center;justify-content:center;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:2px;flex-shrink:0;}
+.cl-sync.saving{background:var(--amber);}
+.cl-sync.error{background:var(--danger);}
+.cl-sync.off{background:var(--text-faint);}
+
 /* ═══════════ TOAST ═══════════ */
 #toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,80px);background:var(--surface-3);color:var(--text);padding:9px 10px 9px 16px;border-radius:10px;
   font-size:13px;box-shadow:var(--shadow-pop);transition:transform .25s ease,opacity .25s;opacity:0;z-index:999;display:flex;align-items:center;gap:12px;max-width:92vw;}
@@ -457,7 +485,7 @@ select{cursor:pointer;}
   <div class="counter only-desktop" id="counter"></div>
   <button class="iconbtn icon-only only-mobile" id="btn-search-m" title="Buscar" data-icon="search"></button>
   <select class="lang-select only-desktop" id="lang-select"><option value="es">ESP</option><option value="en">ENG</option></select>
-  <button class="iconbtn icon-only" id="btn-settings" data-i18n-title="settingsTitle" data-icon="settings"></button>
+  <span class="cl-sync off" id="cl-sync"></span><button class="iconbtn icon-only" id="btn-settings" data-i18n-title="settingsTitle" data-icon="settings"></button>
   <button class="primary-btn" id="btn-add"><span data-icon="plus"></span><span class="lbl" data-i18n="add"></span></button>
 </header>
 
@@ -541,6 +569,11 @@ select{cursor:pointer;}
       <select class="lang-select" id="set-lang" style="width:90px"><option value="es">ESP</option><option value="en">ENG</option></select></div>
     <div class="set-row"><div><div class="set-title" data-i18n="theme"></div></div>
       <select class="lang-select" id="set-theme" style="width:110px"><option value="dark" data-i18n="themeDark"></option><option value="light" data-i18n="themeLight"></option></select></div>
+    <div class="set-group" data-i18n="setAccount" id="set-account-group"></div>
+    <div class="set-row" id="set-account-row"><div><div class="set-title" id="set-account-email"></div><div class="set-desc" data-i18n="accountDesc"></div></div>
+      <button class="ghost-btn" data-act="signout"><span data-icon="logout"></span><span data-i18n="signOut"></span></button></div>
+    <div class="set-row" id="set-enc-row"><div><div class="set-title" data-i18n="encRow"></div><div class="set-desc" id="set-enc-desc"></div></div>
+      <button class="ghost-btn" data-act="encryption"><span data-icon="lock"></span><span data-i18n="encView"></span></button></div>
     <div class="set-group" data-i18n="setData"></div>
     <div class="set-row"><div><div class="set-title" data-i18n="export"></div><div class="set-desc" data-i18n="exportDesc"></div></div>
       <button class="ghost-btn" data-act="export"><span data-icon="download"></span><span data-i18n="export"></span></button></div>
@@ -549,7 +582,7 @@ select{cursor:pointer;}
     <div class="set-row"><div><div class="set-title" data-i18n="copy"></div><div class="set-desc" data-i18n="copyDesc"></div></div>
       <div style="display:flex;gap:6px"><button class="ghost-btn" data-act="copy"><span data-icon="copy"></span><span data-i18n="copy"></span></button>
       <button class="ghost-btn" data-act="paste"><span data-icon="clipboard"></span><span data-i18n="paste"></span></button></div></div>
-    <div class="set-foot">Arbolito App v3.8 · <span data-i18n="localNote"></span></div>
+    <div class="set-foot">Arbolito App v4.0 · <span id="set-foot-note" data-i18n="localNote"></span></div>
   </div>
 </div>
 
@@ -650,16 +683,50 @@ select{cursor:pointer;}
 </div>
 
 <div class="ctx-menu" id="ctx-menu"></div>
+
+<!-- CLOUD: login -->
+<div class="cl-screen" id="auth-screen">
+  <form class="cl-card" id="auth-form" onsubmit="return false">
+    <div class="cl-brand"><span class="dot"></span>Arbolito App</div>
+    <p class="cl-text" id="auth-sub" data-i18n="authSub"></p>
+    <input class="cl-input" id="auth-email" type="email" autocomplete="username" data-i18n-ph="authEmail">
+    <input class="cl-input" id="auth-pass" type="password" autocomplete="current-password" data-i18n-ph="authPass">
+    <div class="cl-err" id="auth-err" hidden></div>
+    <div class="cl-note" id="auth-note" hidden></div>
+    <button class="cl-btn primary block" id="auth-login" type="submit" data-i18n="authLogin"></button>
+    <div class="cl-links"><button class="cl-link" type="button" id="auth-signup" data-i18n="authSignup"></button><button class="cl-link" type="button" id="auth-guest" data-i18n="authGuest"></button></div>
+  </form>
+</div>
+<!-- CLOUD: unlock (encrypted data) -->
+<div class="cl-screen" id="lock-screen">
+  <form class="cl-card" id="lock-form" onsubmit="return false">
+    <div class="cl-brand"><span class="dot"></span>Arbolito App</div>
+    <p class="cl-text" data-i18n="lockText"></p>
+    <input class="cl-input" id="lock-pass" type="password" autocomplete="current-password" data-i18n-ph="encPass">
+    <div class="cl-err" id="lock-err" hidden></div>
+    <button class="cl-btn primary block" id="lock-go" type="submit" data-i18n="unlock"></button>
+    <div class="cl-links"><span></span><button class="cl-link" type="button" id="lock-out" data-i18n="signOut"></button></div>
+  </form>
+</div>
+<!-- CLOUD: encryption settings (like Task App) -->
+<div class="cl-screen" id="enc-screen">
+  <div class="cl-card">
+    <button class="cl-close" type="button" onclick="encClose()">✕</button>
+    <div class="cl-title" data-i18n="encTitle"></div>
+    <div id="enc-body"></div>
+  </div>
+</div>
 <div id="toast"></div>
 <input type="file" id="imp-file" accept=".json,application/json" style="display:none">
 <input type="file" id="photo-file" accept="image/*" style="display:none">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 /* ════════════════════════════════════════════════════════════════
    Arbolito v3.0
    Datos: localStorage 'gt3' (mismo formato que v2.x)
    ════════════════════════════════════════════════════════════════ */
-const VERSION='3.8';
+const VERSION='4.0';
 
 /* ── layout constants ── */
 const CARD_W=188;          // card width (px, canvas units) — keep in sync with --card-w
@@ -672,6 +739,7 @@ const COUPLE_SLOT=CARD_W+COUPLE_GAP;
 
 /* ── icons (lucide-style) ── */
 const ICONS={
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
   plus:'<path d="M5 12h14M12 5v14"/>',minus:'<path d="M5 12h14"/>',
   search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
@@ -779,8 +847,9 @@ function persist(){
   try{
     localStorage.setItem('gt3',JSON.stringify({people:S.people,connections:S.connections,nextId:S.nextId,collapsed:S.collapsed,_dbgGen:S._dbgGen||{},_secCollapsed:S._secCollapsed||{},famCollapsed:S.famCollapsed||{}}));
   }catch(e){
-    if(!_quotaWarned){_quotaWarned=true;toast(t('quotaErr'),{action:t('export'),fn:exportData,ms:9000});}
+    if(!_quotaWarned&&!CLOUD.user){_quotaWarned=true;toast(t('quotaErr'),{action:t('export'),fn:exportData,ms:9000});}
   }
+  cloudSchedule();
   updateHistoryUI(); updateCounter();
 }
 function restoreSnap(snap){
@@ -789,6 +858,7 @@ function restoreSnap(snap){
   S.people=d.people;S.connections=d.connections;S.nextId=d.nextId;S.collapsed=d.collapsed||{};S._dbgGen=d._dbgGen||{};S._secCollapsed=d._sec||{};S.famCollapsed=d.fam||{};
   HIST.last=snap;
   try{localStorage.setItem('gt3',JSON.stringify({people:S.people,connections:S.connections,nextId:S.nextId,collapsed:S.collapsed,_dbgGen:S._dbgGen,_secCollapsed:S._secCollapsed,famCollapsed:S.famCollapsed}));}catch(e){}
+  cloudSchedule();
   S.selectedIds.forEach(id=>{if(!S.people[id])S.selectedIds.delete(id);});
   if(S.selectedId&&!S.people[S.selectedId])S.selectedId=null;
   renderAll();
@@ -2188,10 +2258,13 @@ function doPasteFallback(){
   closeModal('paste-fallback-modal');document.getElementById('paste-fallback-area').value='';
   tryImportText(text);
 }
-function exportData(){
+async function exportData(){
   const a=document.createElement('a');
   const d=new Date();const stamp=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify({people:S.people,connections:S.connections,nextId:S.nextId,collapsed:S.collapsed,_dbgGen:S._dbgGen,_secCollapsed:S._secCollapsed,famCollapsed:S.famCollapsed,_v:'arbolito-v'+VERSION},null,2)],{type:'application/json'}));
+  let out={people:S.people,connections:S.connections,nextId:S.nextId,collapsed:S.collapsed,_dbgGen:S._dbgGen,_secCollapsed:S._secCollapsed,famCollapsed:S.famCollapsed,_v:'arbolito-v'+VERSION};
+  // with encryption on, the whole backup is encrypted with the same key as the data
+  if(CLOUD.meta.encrypted&&CLOUD.key)out=Object.assign({arbolitoBackup:2,encrypted:true,salt:CLOUD.meta.salt},await encStr(CLOUD.key,JSON.stringify(out)));
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));
   a.download='arbolito-'+stamp+'.json';a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),2000);
   toast(t('exported'));
@@ -2199,8 +2272,15 @@ function exportData(){
 function handleImport(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=ev=>{
+  r.onload=async ev=>{
     let d;try{d=JSON.parse(ev.target.result);}catch(err){toast(t('importError'));return;}
+    if(d&&d.encrypted&&d.salt&&d.iv&&d.ciphertext){
+      try{
+        let key=CLOUD.key&&CLOUD.meta.salt===d.salt?CLOUD.key:null;
+        if(!key){const pw=await askPass(t('encBackupTitle'),t('encBackupText'));if(pw==null)return;key=await kdf(pw,d.salt);}
+        d=JSON.parse(await decStr(key,d));
+      }catch(err){toast(t('wrongPass'));return;}
+    }
     if(!d||!d.people){toast(t('importError'));return;}
     d._partial=false;
     if(Object.keys(S.people).length){S._pendingImport=d;document.getElementById('paste-confirm-msg').textContent=t('replaceMsgFile');openModal('paste-confirm-modal');}
@@ -3337,7 +3417,7 @@ var LANG={
     newHere:'Crear acá',newMan:'Nuevo hombre',newWoman:'Nueva mujer',newOther:'Nueva persona (otro)',pasteHere:'Pegar acá',selectAll:'Seleccionar todo',alignSel:'Alinear selección',copySel:'Copiar selección',deleteN:'Eliminar {n} personas',centerHere:'Centrar en pantalla',
     settingsTitle:'Configuración',setGeneral:'General',setData:'Datos',language:'Idioma',showIds:'IDs de generación (debug)',
     exportDesc:'Descarga el árbol completo como archivo .json (copia de seguridad).',importDesc:'Reemplaza el árbol actual por uno de un archivo .json. Se puede deshacer.',
-    copyDesc:'Copia lo seleccionado (o todo) para pegarlo en otro navegador o árbol.',localNote:'Los datos se guardan en este navegador',
+    copyDesc:'Copia lo seleccionado (o todo) para pegarlo en otro navegador o árbol.',setAccount:"Cuenta",accountDesc:"Tu árbol se guarda en tu cuenta y se sincroniza entre dispositivos.",signOut:"Cerrar sesión",encRow:"Cifrado",encView:"Ver cifrado",encIsOn:"Tus datos están cifrados.",encIsOff:"Tus datos no están cifrados.",cloudNote:"Sincronizado con tu cuenta",authSub:"Entrá para ver tu árbol en cualquier dispositivo.",authEmail:"Email",authPass:"Contraseña",authLogin:"Entrar",authSignup:"Crear cuenta",authGuest:"Entrar como invitado",authFill:"Completá email y contraseña.",authShort:"La contraseña necesita al menos 6 caracteres.",authConfirm:"Te mandamos un mail para confirmar la cuenta. Revisá tu bandeja de entrada.",authBad:"Email o contraseña incorrectos.",guestFail:"No se pudo entrar como invitado.",guest:"Invitado",lockText:"Tus datos están cifrados. Ingresá tu contraseña de cifrado para desbloquearlos.",unlock:"Desbloquear",encTitle:"Cifrado de extremo a extremo",encOnText:"Tus datos se cifran en tu navegador antes de guardarse (AES-256-GCM). Nadie con acceso a la base de datos puede leerlos.",encOffText:"Tus datos se guardan sin cifrar. Podés activar el cifrado de extremo a extremo cuando quieras.",encEnable:"Activar cifrado",encDisable:"Desactivar cifrado",encCreateText:"Creá una contraseña de cifrado. Es distinta de tu contraseña de acceso y nunca sale de este navegador. Si la olvidás, no hay forma de recuperar los datos.",encOffConfirm:"Ingresá tu contraseña de cifrado actual para confirmar que querés desactivarlo. Una vez desactivado, tus datos quedan sin cifrar en la base de datos.",encPass:"Contraseña de cifrado",encPass2:"Repetí la contraseña",encPassCur:"Contraseña de cifrado actual",encConfirmOff:"Confirmar y desactivar",encMin:"Usá al menos 8 caracteres.",encMismatch:"Las contraseñas no coinciden.",encHttps:"El cifrado necesita HTTPS (o localhost). Esta página no cumple ese requisito.",encTurningOn:"Activando...",encChecking:"Verificando...",encDoneOn:"Cifrado activado",encDoneOff:"Cifrado desactivado",encEnter:"Ingresá tu contraseña de cifrado.",encEnterCur:"Ingresá tu contraseña de cifrado actual.",wrongPass:"Contraseña incorrecta.",encBackupTitle:"Backup cifrado",encBackupText:"Ingresá la contraseña de cifrado con la que se hizo este backup.",open:"Abrir",close:"Cerrar",syncOk:"Guardado en tu cuenta",syncSaving:"Guardando…",syncError:"No se pudo guardar — reintentando",syncOff:"Sin conexión con tu cuenta",syncFailed:"No se pudo guardar en tu cuenta. Reintentando…",loadFailed:"No se pudo cargar tu árbol. Revisá tu conexión.",uploadedLocal:"Tu árbol de este navegador se guardó en tu cuenta.",localKept:"Guardé una copia del árbol que tenías en este navegador.",localRestore:"Recuperar",localNote:'Los datos se guardan en este navegador',
     quotaErr:'No hay más espacio para guardar en este navegador (fotos muy pesadas). Exportá el árbol para no perder cambios.',
   },
   en:{
@@ -3395,7 +3475,7 @@ var LANG={
     newHere:'Create here',newMan:'New man',newWoman:'New woman',newOther:'New person (other)',pasteHere:'Paste here',selectAll:'Select all',alignSel:'Align selection',copySel:'Copy selection',deleteN:'Delete {n} people',centerHere:'Center on screen',
     settingsTitle:'Settings',setGeneral:'General',setData:'Data',language:'Language',showIds:'Generation IDs (debug)',
     exportDesc:'Downloads the whole tree as a .json file (backup).',importDesc:'Replaces the current tree with one from a .json file. Can be undone.',
-    copyDesc:'Copies the selection (or everything) to paste in another browser or tree.',localNote:'Data is stored in this browser',
+    copyDesc:'Copies the selection (or everything) to paste in another browser or tree.',setAccount:"Account",accountDesc:"Your tree is saved to your account and synced across devices.",signOut:"Sign out",encRow:"Encryption",encView:"View encryption",encIsOn:"Your data is encrypted.",encIsOff:"Your data isn't encrypted.",cloudNote:"Synced with your account",authSub:"Sign in to see your tree on any device.",authEmail:"Email",authPass:"Password",authLogin:"Sign in",authSignup:"Create account",authGuest:"Continue as guest",authFill:"Enter your email and password.",authShort:"The password needs at least 6 characters.",authConfirm:"We sent you an email to confirm your account. Check your inbox.",authBad:"Wrong email or password.",guestFail:"Couldn't sign in as guest.",guest:"Guest",lockText:"Your data is encrypted. Enter your encryption password to unlock it.",unlock:"Unlock",encTitle:"End-to-end encryption",encOnText:"Your data is encrypted in your browser before it's saved (AES-256-GCM). No one with access to the database can read it.",encOffText:"Your data is stored unencrypted. You can turn on end-to-end encryption whenever you want.",encEnable:"Turn on encryption",encDisable:"Turn off encryption",encCreateText:"Create an encryption password. It's different from your sign-in password and never leaves this browser. If you forget it, there's no way to recover your data.",encOffConfirm:"Enter your current encryption password to confirm you want to turn it off. Once it's off, your data is stored unencrypted in the database.",encPass:"Encryption password",encPass2:"Repeat the password",encPassCur:"Current encryption password",encConfirmOff:"Confirm and turn off",encMin:"Use at least 8 characters.",encMismatch:"Passwords don't match.",encHttps:"Encryption requires HTTPS (or localhost). This page doesn't meet that requirement.",encTurningOn:"Turning on...",encChecking:"Checking...",encDoneOn:"Encryption turned on",encDoneOff:"Encryption turned off",encEnter:"Enter your encryption password.",encEnterCur:"Enter your current encryption password.",wrongPass:"Wrong password.",encBackupTitle:"Encrypted backup",encBackupText:"Enter the encryption password this backup was made with.",open:"Open",close:"Close",syncOk:"Saved to your account",syncSaving:"Saving…",syncError:"Couldn't save — retrying",syncOff:"Not connected to your account",syncFailed:"Couldn't save to your account. Retrying…",loadFailed:"Couldn't load your tree. Check your connection.",uploadedLocal:"This browser's tree was saved to your account.",localKept:"I kept a copy of the tree you had in this browser.",localRestore:"Restore",localNote:'Data is stored in this browser',
     quotaErr:'This browser is out of storage space (heavy photos). Export the tree so you do not lose changes.',
   }
 };
@@ -3417,6 +3497,243 @@ function applyLangToUI(){
   else if(S.panelMode==='detail'&&S.selectedId)openDetailPanel(S.selectedId);
 }
 
+
+/* ════════════════════════════════════════════════════════════════
+   CLOUD — cuenta, guardado en Supabase (proyecto extra-apps, tabla
+   arbolito_kv, igual que Gastos App) y cifrado opcional de extremo a
+   extremo. Filas: "tree" (todo el árbol sin fotos), "photo:<id>" (una
+   por foto) y "__enc_meta__" ({encrypted, salt}, nunca cifrada).
+   Con cifrado, cada valor se guarda como {__enc,iv,ciphertext}
+   (AES-256-GCM, clave PBKDF2-SHA256 de la contraseña; no sale del navegador).
+   ════════════════════════════════════════════════════════════════ */
+const SB_URL='https://bfzagasujmhcforrakux.supabase.co',SB_KEY='sb_publishable_6qjJYRPBRp74phem0E1mAg_j4-BfggP',SB_TABLE='arbolito_kv',ENC_META='__enc_meta__';
+const sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY):null;
+const CLOUD={user:null,key:null,meta:{encrypted:false},ready:false,timer:null,saving:false,again:false,tree:null,photos:{},mine:new Set(),chan:null,failed:0};
+const KDF_ITER=310000;
+const b64e=u=>{let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s);};
+const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function kdf(pass,salt){const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:b64d(salt),iterations:KDF_ITER,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function encStr(key,str){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(str)));return {iv:b64e(iv),ciphertext:b64e(ct)};}
+async function decStr(key,env){return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(env.iv)},key,b64d(env.ciphertext)));}
+function isEnc(v){if(typeof v!=='string'||v[0]!=='{')return false;try{const o=JSON.parse(v);return !!(o&&o.__enc&&o.iv&&o.ciphertext);}catch(e){return false;}}
+async function sealVal(v){return CLOUD.key?JSON.stringify(Object.assign({__enc:true},await encStr(CLOUD.key,v))):v;}
+async function openVal(v){if(!isEnc(v))return v;if(!CLOUD.key)throw new Error('locked');return decStr(CLOUD.key,JSON.parse(v));}
+
+function treeStr(){const people={};for(const id in S.people){const c=Object.assign({},S.people[id]);delete c.photo;people[id]=c;}
+  return JSON.stringify({people,connections:S.connections,nextId:S.nextId,collapsed:S.collapsed,_dbgGen:S._dbgGen||{},_secCollapsed:S._secCollapsed||{},famCollapsed:S.famCollapsed||{}});}
+function photoMap(){const m={};for(const id in S.people){const ph=S.people[id].photo;if(ph)m[id]=ph;}return m;}
+function setSync(st){const el=document.getElementById('cl-sync');if(!el)return;el.className='cl-sync'+(st&&st!=='ok'?' '+st:'');el.title=t(st==='saving'?'syncSaving':st==='error'?'syncError':st==='off'?'syncOff':'syncOk');}
+
+async function cloudUpsert(rows){
+  if(!rows.length)return;
+  const now=new Date().toISOString();
+  const out=[];for(const r of rows)out.push({user_id:CLOUD.user.id,key:r.key,value:r.raw?r.value:await sealVal(r.value),updated_at:now});
+  const {error}=await sb.from(SB_TABLE).upsert(out);if(error)throw error;
+  CLOUD.mine.add(now);if(CLOUD.mine.size>50)CLOUD.mine.delete(CLOUD.mine.values().next().value);
+}
+async function cloudDelete(keys){if(!keys.length)return;const {error}=await sb.from(SB_TABLE).delete().in('key',keys);if(error)throw error;}
+
+function cloudSchedule(){if(!CLOUD.ready)return;clearTimeout(CLOUD.timer);setSync('saving');CLOUD.timer=setTimeout(cloudSave,700);}
+async function cloudSave(full){
+  if(!CLOUD.ready)return;
+  if(CLOUD.saving){CLOUD.again=true;return;}
+  CLOUD.saving=true;CLOUD.timer=null;
+  try{
+    const tree=treeStr(),ph=photoMap(),rows=[],gone=[];
+    if(full||tree!==CLOUD.tree)rows.push({key:'tree',value:tree});
+    for(const id in ph)if(full||CLOUD.photos[id]!==ph[id])rows.push({key:'photo:'+id,value:ph[id]});
+    for(const id in CLOUD.photos)if(!ph[id])gone.push('photo:'+id);
+    await cloudUpsert(rows);await cloudDelete(gone);
+    CLOUD.tree=tree;CLOUD.photos=ph;CLOUD.failed=0;setSync('ok');
+  }catch(e){
+    console.error('cloudSave',e);setSync('error');
+    if(!CLOUD.failed++)toast(t('syncFailed'));
+    clearTimeout(CLOUD.timer);CLOUD.timer=setTimeout(cloudSave,Math.min(30000,3000*CLOUD.failed));
+  }finally{
+    CLOUD.saving=false;
+    if(CLOUD.again){CLOUD.again=false;cloudSave();}
+  }
+}
+
+// Apply a tree (and photos) coming from the cloud
+function applyCloudTree(tree,photos){
+  const d=JSON.parse(tree);
+  for(const id in (d.people||{})){if(photos[id])d.people[id].photo=photos[id];}
+  S.people=d.people||{};S.connections=d.connections||[];S.nextId=d.nextId||1;S.collapsed=d.collapsed||{};
+  S._dbgGen=d._dbgGen||{};S._secCollapsed=d._secCollapsed||{};S.famCollapsed=d.famCollapsed||{};
+  for(const k in PHOTO_CACHE)delete PHOTO_CACHE[k];
+  sanitize();
+  try{localStorage.setItem('gt3',JSON.stringify({people:S.people,connections:S.connections,nextId:S.nextId,collapsed:S.collapsed,_dbgGen:S._dbgGen,_secCollapsed:S._secCollapsed,famCollapsed:S.famCollapsed}));}catch(e){}
+}
+
+async function cloudLoad(){
+  const {data,error}=await sb.from(SB_TABLE).select('key,value');
+  if(error)throw error;
+  const rows={};(data||[]).forEach(r=>{rows[r.key]=r.value;});
+  let meta={encrypted:false};try{if(rows[ENC_META])meta=JSON.parse(rows[ENC_META]);}catch(e){}
+  CLOUD.meta=meta;
+  if(meta.encrypted&&!CLOUD.key){showScreen('lock-screen');setTimeout(()=>{const i=document.getElementById('lock-pass');i&&i.focus();},50);return false;}
+  const photos={};let tree=null;
+  for(const k in rows){if(k===ENC_META)continue;const v=await openVal(rows[k]);if(k==='tree')tree=v;else if(k.indexOf('photo:')===0)photos[k.slice(6)]=v;}
+  let prevLocal=null;try{prevLocal=localStorage.getItem('gt3');}catch(e){}
+  const localOwner=(()=>{try{return localStorage.getItem('gt_cloud_user');}catch(e){return null;}})();
+  const localHas=(()=>{try{const d=JSON.parse(prevLocal||'null');return d&&d.people&&Object.keys(d.people).length>0;}catch(e){return false;}})();
+  if(tree){
+    // first time on this browser with a different local tree: keep a copy, just in case
+    if(localHas&&localOwner!==CLOUD.user.id){try{const d=JSON.parse(prevLocal);const tr=JSON.parse(tree);if(JSON.stringify(d.connections)!==JSON.stringify(tr.connections)||Object.keys(d.people).length!==Object.keys(tr.people||{}).length){localStorage.setItem('gt3_local_backup',prevLocal);setTimeout(()=>toast(t('localKept'),{action:t('localRestore'),fn:restoreLocalBackup,ms:10000}),900);}}catch(e){}}
+    applyCloudTree(tree,photos);
+    CLOUD.tree=treeStr();CLOUD.photos=photoMap();
+  }else{
+    // empty account: the tree in this browser (if any, and not someone else's) goes up
+    if(localOwner&&localOwner!==CLOUD.user.id){S.people={};S.connections=[];S.nextId=1;S.collapsed={};S._dbgGen={};S._secCollapsed={};S.famCollapsed={};}
+    CLOUD.tree=null;CLOUD.photos={};
+  }
+  try{localStorage.setItem('gt_cloud_user',CLOUD.user.id);}catch(e){}
+  CLOUD.ready=true;
+  if(!tree&&Object.keys(S.people).length){await cloudSave(true);toast(t('uploadedLocal'));}
+  for(const id in S.people)if(S.people[id].photo)PHOTO_CACHE[id]=S.people[id].photo;
+  HIST.undo.length=0;HIST.redo.length=0;HIST.last=snapshot();
+  clearSelection();closePanel();updateGenDisplay(true);renderAll();updateHistoryUI();updateCounter();
+  requestAnimationFrame(()=>{for(const id in S.people)measureCard(id);renderConns();fitScreen(true);});
+  setSync('ok');cloudListen();
+  return true;
+}
+function restoreLocalBackup(){try{const d=JSON.parse(localStorage.getItem('gt3_local_backup')||'null');if(d&&d.people){d._partial=false;applyImport(d);}}catch(e){}}
+
+// Live updates from other devices
+function cloudListen(){
+  if(CLOUD.chan){try{sb.removeChannel(CLOUD.chan);}catch(e){}}
+  CLOUD.chan=sb.channel('arbolito_'+CLOUD.user.id).on('postgres_changes',{event:'*',schema:'public',table:SB_TABLE,filter:'user_id=eq.'+CLOUD.user.id},async ev=>{
+    const r=ev.new;if(!r||!r.key)return;
+    if(r.updated_at&&[...CLOUD.mine].some(m=>Date.parse(m)===Date.parse(r.updated_at)))return;
+    if(r.key===ENC_META){try{const m=JSON.parse(r.value);if(!!m.encrypted!==!!CLOUD.meta.encrypted||m.salt!==CLOUD.meta.salt){CLOUD.key=null;CLOUD.ready=false;await cloudLoad();}}catch(e){}return;}
+    if(CLOUD.timer||CLOUD.saving||S.draggingCard)return;   // our own pending change wins
+    try{
+      const v=await openVal(r.value);
+      if(r.key==='tree'){if(v===CLOUD.tree)return;applyCloudTree(v,photoMap());CLOUD.tree=v;}
+      else if(r.key.indexOf('photo:')===0){const id=r.key.slice(6);CLOUD.photos[id]=v;if(S.people[id])S.people[id].photo=v;}
+      else return;
+      HIST.last=snapshot();renderAll();updateCounter();
+      if(S.panelMode==='detail'&&S.selectedId&&S.people[S.selectedId])openDetailPanel(S.selectedId);
+    }catch(e){console.error('realtime',e);}
+  }).subscribe();
+}
+
+/* ── screens ── */
+function showScreen(id){['auth-screen','lock-screen'].forEach(x=>document.getElementById(x).classList.toggle('open',x===id));}
+function msgEl(id,txt){const el=document.getElementById(id);if(!el)return;el.hidden=!txt;el.textContent=txt||'';}
+async function cloudStart(user){
+  CLOUD.user=user;showScreen(null);
+  const em=document.getElementById('set-account-email');if(em)em.textContent=user.email||t('guest');
+  try{await cloudLoad();}catch(e){console.error(e);setSync('error');toast(t('loadFailed'));}
+}
+async function authSubmit(kind){
+  msgEl('auth-err','');msgEl('auth-note','');
+  if(kind==='guest'){const {data,error}=await sb.auth.signInAnonymously();if(error){msgEl('auth-err',t('guestFail'));return;}return cloudStart(data.user);}
+  const email=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-pass').value;
+  if(!email||!password){msgEl('auth-err',t('authFill'));return;}
+  const btn=document.getElementById('auth-login');btn.disabled=true;
+  try{
+    if(kind==='signup'){
+      if(password.length<6){msgEl('auth-err',t('authShort'));return;}
+      const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});
+      if(error){msgEl('auth-err',error.message);return;}
+      if(data.session)return cloudStart(data.user);
+      msgEl('auth-note',t('authConfirm'));return;
+    }
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error){msgEl('auth-err',/invalid/i.test(error.message)?t('authBad'):error.message);return;}
+    document.getElementById('auth-pass').value='';
+    cloudStart(data.user);
+  }finally{btn.disabled=false;}
+}
+async function lockSubmit(){
+  msgEl('lock-err','');const pass=document.getElementById('lock-pass').value;if(!pass){msgEl('lock-err',t('encEnter'));return;}
+  const btn=document.getElementById('lock-go');btn.disabled=true;
+  try{
+    const key=await kdf(pass,CLOUD.meta.salt);
+    const {data}=await sb.from(SB_TABLE).select('value').eq('key','tree').maybeSingle();
+    if(data&&isEnc(data.value))await decStr(key,JSON.parse(data.value));   // throws on a wrong password
+    CLOUD.key=key;document.getElementById('lock-pass').value='';showScreen(null);await cloudLoad();
+  }catch(e){msgEl('lock-err',t('wrongPass'));}
+  finally{btn.disabled=false;}
+}
+async function cloudSignOut(){
+  try{if(CLOUD.ready&&(CLOUD.timer||CLOUD.saving)){clearTimeout(CLOUD.timer);await cloudSave();}}catch(e){}
+  if(CLOUD.chan){try{sb.removeChannel(CLOUD.chan);}catch(e){}CLOUD.chan=null;}
+  CLOUD.ready=false;CLOUD.user=null;CLOUD.key=null;CLOUD.tree=null;CLOUD.photos={};
+  await sb.auth.signOut().catch(()=>{});
+  try{localStorage.removeItem('gt3');localStorage.removeItem('gt_cloud_user');}catch(e){}
+  S.people={};S.connections=[];S.nextId=1;S.collapsed={};S._dbgGen={};S._secCollapsed={};S.famCollapsed={};
+  for(const k in PHOTO_CACHE)delete PHOTO_CACHE[k];
+  HIST.undo.length=0;HIST.redo.length=0;HIST.last=snapshot();clearSelection();closePanel();renderAll();updateHistoryUI();updateCounter();
+  setSync('off');showScreen('auth-screen');
+}
+
+/* ── encryption settings (status → enable / disable), like Task App ── */
+let ENC_VIEW='status';
+function encOpen(){ENC_VIEW='status';encRender();document.getElementById('enc-screen').classList.add('open');}
+function encClose(){document.getElementById('enc-screen').classList.remove('open');}
+function encRender(){
+  const on=!!CLOUD.meta.encrypted,b=document.getElementById('enc-body');
+  if(ENC_VIEW==='status')b.innerHTML='<p class="cl-text">'+esc(t(on?'encOnText':'encOffText'))+'</p><div class="cl-actions"><button class="cl-btn" onclick="encClose()">'+esc(t('close'))+'</button>'+
+    (on?'<button class="cl-btn danger" onclick="ENC_VIEW=\'disable\';encRender()">'+esc(t('encDisable'))+'</button>':'<button class="cl-btn primary" onclick="ENC_VIEW=\'enable\';encRender()">'+esc(t('encEnable'))+'</button>')+'</div>';
+  else if(ENC_VIEW==='enable')b.innerHTML='<p class="cl-text">'+esc(t('encCreateText'))+'</p><input class="cl-input" id="enc-p1" type="password" placeholder="'+esc(t('encPass'))+'"><input class="cl-input" id="enc-p2" type="password" placeholder="'+esc(t('encPass2'))+'" onkeydown="event.key===\'Enter\'&&encEnable()"><div class="cl-err" id="enc-err" hidden></div>'+
+    '<div class="cl-actions"><button class="cl-btn" onclick="ENC_VIEW=\'status\';encRender()">'+esc(t('cancel'))+'</button><button class="cl-btn primary" id="enc-go" onclick="encEnable()">'+esc(t('encEnable'))+'</button></div>';
+  else b.innerHTML='<p class="cl-text">'+esc(t('encOffConfirm'))+'</p><input class="cl-input" id="enc-p1" type="password" placeholder="'+esc(t('encPassCur'))+'" onkeydown="event.key===\'Enter\'&&encDisable()"><div class="cl-err" id="enc-err" hidden></div>'+
+    '<div class="cl-actions"><button class="cl-btn" onclick="ENC_VIEW=\'status\';encRender()">'+esc(t('cancel'))+'</button><button class="cl-btn danger" id="enc-go" onclick="encDisable()">'+esc(t('encConfirmOff'))+'</button></div>';
+  const i=document.getElementById('enc-p1');if(i)i.focus();
+  const d=document.getElementById('set-enc-desc');if(d)d.textContent=t(on?'encIsOn':'encIsOff');
+}
+async function encEnable(){
+  const p1=document.getElementById('enc-p1').value,p2=document.getElementById('enc-p2').value;
+  if(p1.length<8)return msgEl('enc-err',t('encMin'));if(p1!==p2)return msgEl('enc-err',t('encMismatch'));
+  if(!window.isSecureContext||!crypto.subtle)return msgEl('enc-err',t('encHttps'));
+  const btn=document.getElementById('enc-go');btn.disabled=true;btn.textContent=t('encTurningOn');
+  try{
+    const salt=b64e(crypto.getRandomValues(new Uint8Array(16))),key=await kdf(p1,salt),old=CLOUD.key;
+    CLOUD.key=key;
+    try{await cloudSave(true);await cloudUpsert([{key:ENC_META,value:JSON.stringify({encrypted:true,salt}),raw:true}]);}catch(e){CLOUD.key=old;throw e;}
+    CLOUD.meta={encrypted:true,salt};encClose();toast(t('encDoneOn'));encRender();
+  }catch(e){msgEl('enc-err',String(e&&e.message||e));}
+  finally{btn.disabled=false;btn.textContent=t('encEnable');}
+}
+async function encDisable(){
+  const p=document.getElementById('enc-p1').value;if(!p)return msgEl('enc-err',t('encEnterCur'));
+  const btn=document.getElementById('enc-go');btn.disabled=true;btn.textContent=t('encChecking');
+  try{
+    const key=await kdf(p,CLOUD.meta.salt);
+    const {data}=await sb.from(SB_TABLE).select('value').eq('key','tree').maybeSingle();
+    if(data&&isEnc(data.value)){try{await decStr(key,JSON.parse(data.value));}catch(e){throw new Error(t('wrongPass'));}}
+    const old=CLOUD.key;CLOUD.key=null;
+    try{await cloudSave(true);await cloudUpsert([{key:ENC_META,value:JSON.stringify({encrypted:false}),raw:true}]);}catch(e){CLOUD.key=old;throw e;}
+    CLOUD.meta={encrypted:false};encClose();toast(t('encDoneOff'));encRender();
+  }catch(e){msgEl('enc-err',String(e&&e.message||e));}
+  finally{btn.disabled=false;btn.textContent=t('encConfirmOff');}
+}
+
+/* ── password prompt (restoring an encrypted backup) ── */
+function askPass(title,text){return new Promise(res=>{
+  const ov=document.createElement('div');ov.className='cl-screen open';ov.style.zIndex=600;
+  ov.innerHTML='<form class="cl-card"><div class="cl-title"></div><p class="cl-text"></p><input class="cl-input" type="password" autocomplete="current-password"><div class="cl-actions"><button type="button" class="cl-btn"></button><button type="submit" class="cl-btn primary"></button></div></form>';
+  const f=ov.firstChild;f.querySelector('.cl-title').textContent=title;f.querySelector('.cl-text').textContent=text;
+  const [b1,b2]=f.querySelectorAll('button');b1.textContent=t('cancel');b2.textContent=t('open');
+  const done=v=>{ov.remove();res(v);};b1.onclick=()=>done(null);f.onsubmit=e=>{e.preventDefault();done(f.querySelector('input').value);};
+  ov.addEventListener('keydown',e=>{if(e.key==='Escape')done(null);});document.body.appendChild(ov);f.querySelector('input').focus();});}
+
+async function cloudBoot(){
+  if(!sb){setSync('off');const fn=document.getElementById('set-foot-note');if(fn)fn.textContent=t('localNote');document.getElementById('set-account-group').style.display='none';document.getElementById('set-account-row').style.display='none';document.getElementById('set-enc-row').style.display='none';return;}
+  document.getElementById('set-foot-note').textContent=t('cloudNote');
+  document.getElementById('auth-form').addEventListener('submit',()=>authSubmit('login'));
+  on('auth-signup',()=>authSubmit('signup'));on('auth-guest',()=>authSubmit('guest'));
+  document.getElementById('lock-form').addEventListener('submit',lockSubmit);
+  on('lock-out',cloudSignOut);
+  sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_OUT'&&CLOUD.user){CLOUD.ready=false;CLOUD.user=null;showScreen('auth-screen');}});
+  const {data}=await sb.auth.getSession();
+  if(data&&data.session)cloudStart(data.session.user);else{setSync('off');showScreen('auth-screen');setTimeout(()=>document.getElementById('auth-email').focus(),50);}
+}
+
 /* ════════════════════════════════════════════════════════════════
    WIRING UP BUTTONS
    ════════════════════════════════════════════════════════════════ */
@@ -3427,7 +3744,7 @@ on('btn-settings',()=>{closeMenus();document.getElementById('set-lang').value=cu
 document.getElementById('settings-modal').addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
   closeModal('settings-modal');
-  ({import:()=>document.getElementById('imp-file').click(),export:exportData,copy:copyTree,paste:pasteTree})[b.dataset.act]();
+  ({import:()=>document.getElementById('imp-file').click(),export:exportData,copy:copyTree,paste:pasteTree,signout:cloudSignOut,encryption:encOpen})[b.dataset.act]();
 });
 document.getElementById('set-lang').addEventListener('change',e=>setLang(e.target.value));
 document.getElementById('set-theme').addEventListener('change',e=>setTheme(e.target.value));
@@ -3471,6 +3788,7 @@ applyTransform();
 HIST.last=snapshot();updateHistoryUI();
 requestAnimationFrame(()=>{for(const id in S.people)measureCard(id);renderConns();fitScreen(true);});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{for(const id in S.people)measureCard(id);renderConns();});
+cloudBoot();
 </script>
 </body>
 </html>
