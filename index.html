@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Arbolito App v4.1 -->
+<!-- Arbolito App v4.2 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -474,7 +474,7 @@ select{cursor:pointer;}
 <body>
 
 <header class="topbar">
-  <div class="brand"><span class="brand-dot"></span><span>Arbolito App</span><span class="brand-ver">v4.1</span></div>
+  <div class="brand"><span class="brand-dot"></span><span>Arbolito App</span><span class="brand-ver">v4.2</span></div>
   <div class="search-wrap" id="search-wrap">
     <span data-icon="search"></span>
     <input type="text" id="search" autocomplete="off" spellcheck="false" data-i18n-ph="searchPh">
@@ -582,7 +582,7 @@ select{cursor:pointer;}
     <div class="set-row"><div><div class="set-title" data-i18n="copy"></div><div class="set-desc" data-i18n="copyDesc"></div></div>
       <div style="display:flex;gap:6px"><button class="ghost-btn" data-act="copy"><span data-icon="copy"></span><span data-i18n="copy"></span></button>
       <button class="ghost-btn" data-act="paste"><span data-icon="clipboard"></span><span data-i18n="paste"></span></button></div></div>
-    <div class="set-foot">Arbolito App v4.1 · <span id="set-foot-note" data-i18n="localNote"></span></div>
+    <div class="set-foot">Arbolito App v4.2 · <span id="set-foot-note" data-i18n="localNote"></span></div>
   </div>
 </div>
 
@@ -726,7 +726,7 @@ select{cursor:pointer;}
    Arbolito v3.0
    Datos: localStorage 'gt3' (mismo formato que v2.x)
    ════════════════════════════════════════════════════════════════ */
-const VERSION='4.1';
+const VERSION='4.2';
 
 /* ── layout constants ── */
 const CARD_W=188;          // card width (px, canvas units) — keep in sync with --card-w
@@ -1273,8 +1273,7 @@ function dragPropagate(fixed){
     f.kids.forEach(k=>{
       if(fixed.has(k)||!S.people[k])return;
       const nx=x0[k]+d;
-      if(Math.abs(nx-now(k))>0.01){S.people[k].x=nx;moveCardEl(k);}
-      followRigidCouple(k);
+      if(Math.abs(nx-now(k))>0.01){S.people[k].x=nx;moveCardEl(k);followRigidCouple(k,fixed);}
     });
   });
 }
@@ -1287,7 +1286,8 @@ function dragCardTo(clientX,clientY){
   S.didDrag=true;
   const moveIds=(S.selectedIds.size>1&&S.selectedIds.has(id))?[...S.selectedIds]:[id];
   moveIds.forEach(mid=>{const pp=S.people[mid];if(!pp)return;if(mid===id){pp.x=nx;pp.y=ny;}else{pp.x=(pp.x||0)+ddx;pp.y=(pp.y||0)+ddy;}moveCardEl(mid);});
-  moveIds.forEach(mid=>followRigidCouple(mid));
+  const fixedSet=new Set(moveIds);
+  moveIds.forEach(mid=>followRigidCouple(mid,fixedSet));
   updateFollowerOffset(id);
   dragPropagate(new Set(moveIds));
   scheduleConns();
@@ -1521,10 +1521,14 @@ function renderConns(){
   const hermGroups={};
   hermConns.forEach(c=>{[c.from,c.to].forEach(id=>{const rt=_ufF(id);(hermGroups[rt]=hermGroups[rt]||new Set()).add(id);});});
   const hermIdx={};VCONNS.forEach(c=>{if(c.type==='hermano'){hermIdx[c.from+'|'+c.to]=c.ci;hermIdx[c.to+'|'+c.from]=c.ci;}});
+  const _gH=graph();
+  const shareParent=(a,b)=>_gH.par[a].some(p=>_gH.par[b].indexOf(p)>=0);
   Object.values(hermGroups).forEach(set=>{
     const members=[...set].sort((a,b)=>(S.people[a].x||0)-(S.people[b].x||0));
+    let drawn=0;
     for(let i=0;i<members.length-1;i++){
       const a=members[i],b=members[i+1];
+      if(shareParent(a,b))continue;   // already joined by their parents' line
       const fp=portCanvasPos(a,'r'),tp=portCanvasPos(b,'l');
       let d,ly=Math.min(fp.y,tp.y)-7;
       const around=someoneBetween(a,b);
@@ -1534,7 +1538,7 @@ function renderConns(){
       const ci=hermIdx[a+'|'+b];
       if(ci!==undefined)hit(d,ci);
       line(d,'ln-hermano');
-      if(i===0&&(around||Math.abs(tp.x-fp.x)>78))label((fp.x+tp.x)/2,ly,t('relHermano'),'lbl-hermano');
+      if(!drawn++&&(around||Math.abs(tp.x-fp.x)>78))label((fp.x+tp.x)/2,ly,t('relHermano'),'lbl-hermano');
     }
   });
 
@@ -2421,14 +2425,14 @@ function updateFollowerOffset(dragId){
     S[key]=(floater.x||0)-(anchor.x||0);
   });
 }
-function followRigidCouple(anchorId){
+function followRigidCouple(anchorId,skip){
   var anchorHasPar=S.connections.some(function(x){return x.type==='padre'&&x.to===anchorId;});
   if(!anchorHasPar)return;
   S.connections.forEach(function(c){
     if(c.type!=='pareja'&&c.type!=='hermano')return;
     var cpId=c.from===anchorId?c.to:c.to===anchorId?c.from:null;
     if(!cpId)return;
-    var cp=S.people[cpId];if(!cp)return;
+    var cp=S.people[cpId];if(!cp||(skip&&skip.has(cpId)))return;
     var cpHasPar=S.connections.some(function(x){return x.type==='padre'&&x.to===cpId;});
     if(cpHasPar)return;
     var anchor=S.people[anchorId];if(!anchor)return;
