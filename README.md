@@ -47,13 +47,3 @@
 - **Web Crypto API** para el cifrado (AES-256-GCM, clave derivada con PBKDF2).
 
 Hermana de [Gastos App](https://github.com/monster-javi/gastos-app) y [Task App](https://github.com/monster-javi/task-app): comparten el diseño y la idea. Todas en [monster-javi.github.io](https://monster-javi.github.io/).
-
----
-
-<p align="center">
-  Si te sirve y querés bancar el proyecto, ¡invitame un cafecito! ☕
-  <br><br>
-  <a href="https://cafecito.app/monsterjavi"><img src="https://cdn.cafecito.app/imgs/buttons/button_2.svg" alt="Invitame un café en cafecito.app" height="36"></a>
-  &nbsp;&nbsp;
-  <a href="https://ko-fi.com/R6R51FQ52H"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Apoyame en Ko-fi" height="36"></a>
-</p>
